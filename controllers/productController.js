@@ -1,4 +1,5 @@
 const Product = require("../models/product");
+const { publicApiBaseUrl } = require("../config/env");
 
 function normalizeSizes(inputSizes) {
   if (Array.isArray(inputSizes)) {
@@ -36,17 +37,31 @@ function normalizeProductImagePath(inputPath) {
   const imageName = normalized.split("/").pop();
 
   if (normalized.includes("productimages/") && imageName) {
-    return `http://localhost:4000/productimages/${imageName}`;
+    return `/productimages/${imageName}`;
   }
 
   return rawPath;
 }
 
-function formatProduct(productDoc) {
+function getRequestBaseUrl(req) {
+  if (publicApiBaseUrl) {
+    return publicApiBaseUrl;
+  }
+
+  return `${req.protocol}://${req.get("host")}`;
+}
+
+function formatProduct(req, productDoc) {
   const product = productDoc.toObject ? productDoc.toObject() : { ...productDoc };
+  const normalizedImage = normalizeProductImagePath(product.pimage);
+  const imageName = String(normalizedImage || "").split("/").pop();
+
   return {
     ...product,
-    pimage: normalizeProductImagePath(product.pimage),
+    pimage:
+      normalizedImage.startsWith("/productimages/") && imageName
+        ? `${getRequestBaseUrl(req)}/productimages/${imageName}`
+        : normalizedImage,
     category: product.category || "General",
     gender: product.gender || "Unisex",
     sizes: Array.isArray(product.sizes) && product.sizes.length ? product.sizes : ["Free Size"],
@@ -68,7 +83,7 @@ function buildProductPayload(body) {
 exports.getAllProducts = async (req, res) => {
   try {
     const productres = await Product.find().sort({ createdAt: -1, _id: -1 });
-    res.json(productres.map(formatProduct));
+    res.json(productres.map((product) => formatProduct(req, product)));
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -93,7 +108,7 @@ exports.createProduct = async (req, res) => {
       return res.status(404).json({ message: "Product not inserted" });
     }
 
-    res.json(formatProduct(productres));
+    res.json(formatProduct(req, productres));
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -121,7 +136,7 @@ exports.updateProduct = async (req, res) => {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    res.json(formatProduct(updatedProduct));
+    res.json(formatProduct(req, updatedProduct));
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -152,7 +167,7 @@ exports.getProductById = async (req, res) => {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    res.json(formatProduct(product));
+    res.json(formatProduct(req, product));
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

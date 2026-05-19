@@ -1,6 +1,6 @@
 ﻿const RegisterUser = require('../models/customerReg');
 const jwt = require('jsonwebtoken');
-const SECRET_KEY = "mysecretkey123";
+const { jwtSecret } = require("../config/env");
 
 exports.registerUser = async (req, res) => {
   try {
@@ -45,7 +45,7 @@ exports.loginUser = async (req, res) => {
         name: res1.name,
       };
 
-      const token = jwt.sign(payload, SECRET_KEY, { expiresIn: '1h' });
+      const token = jwt.sign(payload, jwtSecret, { expiresIn: '1h' });
 
       return res.send({
         msg: 'login successfully',

@@ -1,6 +1,7 @@
 ﻿import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { apiUrl } from "./utils/api";
 import { consumePostLoginRedirect } from "./utils/auth";
 import StoreHeader from "./components/StoreHeader";
 import ProjectFooter from "./components/ProjectFooter";
@@ -56,7 +57,7 @@ function FetchPostexample() {
     }
 
     axios
-      .post("http://localhost:4000/loginuser", { email, password })
+      .post(apiUrl("/loginuser"), { email, password })
       .then((response) => {
         if (response.data.status === "1") {
           const token = response.data.token;

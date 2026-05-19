@@ -1,8 +1,8 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
-const SECRET_KEY = "mysecretkey123";
 const cors = require("cors");
+const { corsOrigins, jwtSecret, mongoUri, port } = require("./config/env");
 const productController = require("./controllers/productController");
 const customerRegController = require("./controllers/customerRegController");
 const customerOrderController = require("./controllers/customerOrderContoller");
@@ -11,17 +11,24 @@ const Customer = require("./models/customerReg");
 const Admin = require("./models/admin");
 
 const app = express();
-const port = 4000;
 
 mongoose
-  .connect("mongodb://localhost:27017/mytestdb")
+  .connect(mongoUri)
   .then(() => {
     console.log("connected to database");
   })
   .catch((err) => console.log(err));
 
+app.set("trust proxy", 1);
 app.use(express.json());
-app.use(cors());
+app.use(
+  cors({
+    origin: corsOrigins.length ? corsOrigins : true,
+  })
+);
+app.get("/", (_req, res) => {
+  res.json({ status: "ok", message: "Shopix API is running" });
+});
 // Keep login routes before all protected/catalog routes so auth pages always reach them.
 app.post("/adminlogin", adminController.loginAdmin);
 app.post("/admin-login", adminController.loginAdmin);
@@ -35,7 +42,7 @@ function verifyToken(req, res, next) {
   }
 
   const token = bearerHeader.split(" ")[1];
-  jwt.verify(token, SECRET_KEY, (err, decoded) => {
+  jwt.verify(token, jwtSecret, (err, decoded) => {
     if (err) {
       return res.status(401).json({ message: "Invalid Token" });
     }
@@ -107,7 +114,7 @@ app.get("/viewOrderByCustID/:id", verifyToken, verifyCustomerToken, customerOrde
 app.get("/checkorders", verifyToken, verifyAdminToken, customerOrderController.getCheckOrders);
 
 app.listen(port, () => {
-  console.log(`http://localhost:${port}`);
+  console.log(`API listening on port ${port}`);
 });
 
 

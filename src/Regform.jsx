@@ -2,6 +2,7 @@
 import { showToast } from "./utils/toast";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { apiUrl } from "./utils/api";
 import StoreHeader from "./components/StoreHeader";
 import ProjectFooter from "./components/ProjectFooter";
 import "./homepage.css";
@@ -49,7 +50,7 @@ function Regform() {
     }
 
     axios
-      .post("http://localhost:4000/register", {
+      .post(apiUrl("/register"), {
         name,
         email,
         password,

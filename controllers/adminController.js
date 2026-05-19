@@ -1,6 +1,6 @@
-const Admin = require('../models/admin');
-const jwt =     require('jsonwebtoken');
-const SECRET_KEY = "mysecretkey123"; 
+const Admin = require("../models/admin");
+const jwt = require("jsonwebtoken");
+const { jwtSecret } = require("../config/env");
 
 exports.registerAdmin = async (req, res) => {
     try {
@@ -45,7 +45,7 @@ exports.loginAdmin = async (req,res)=>{
           if(res1.password == req.body.password)
           {
               const payload = {email: res1.email};
-              const token = jwt.sign(payload, SECRET_KEY, { expiresIn: '1h' });
+              const token = jwt.sign(payload, jwtSecret, { expiresIn: "1h" });
 
               res.send({"msg":"login successfully","status":"1","token":token})
           }

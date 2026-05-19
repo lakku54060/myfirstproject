@@ -1,6 +1,7 @@
 ﻿import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { apiUrl, createImageUrl } from "./utils/api";
 import "./shop.css";
 import StoreHeader from "./components/StoreHeader";
 import { addToCart } from "./utils/cart";
@@ -51,19 +52,7 @@ function Star({ filled = true }) {
 }
 
 function resolveProductImage(imagePath) {
-  const rawPath = String(imagePath || "").trim();
-  if (!rawPath) {
-    return "/assets/storefront/photo-1542291026-7eec264c27ff.jpg";
-  }
-  if (rawPath.startsWith("http://") || rawPath.startsWith("https://")) {
-    return rawPath;
-  }
-  const normalized = rawPath.replace(/\\/g, "/");
-  const imageName = normalized.split("/").pop();
-  if (normalized.includes("productimages/") && imageName) {
-    return `http://localhost:4000/productimages/${imageName}`;
-  }
-  return rawPath;
+  return createImageUrl(imagePath, "/assets/storefront/photo-1542291026-7eec264c27ff.jpg");
 }
 
 function normalizeProduct(item, index) {
@@ -101,7 +90,7 @@ function ShopPage() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:4000/products")
+      .get(apiUrl("/products"))
       .then((response) => {
         const list = Array.isArray(response.data)
           ? response.data.map((item, index) => normalizeProduct(item, index))

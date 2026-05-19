@@ -1,6 +1,7 @@
 ﻿import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
+import { apiUrl, createImageUrl } from "./utils/api";
 import StoreHeader from "./components/StoreHeader";
 import ProjectFooter from "./components/ProjectFooter";
 import "./homepage.css";
@@ -23,17 +24,7 @@ const stateOptions = [
 ];
 
 function resolveImage(imagePath) {
-  const rawPath = String(imagePath || "").trim();
-  if (!rawPath) {
-    return "/assets/storefront/photo-1542291026-7eec264c27ff.jpg";
-  }
-  if (rawPath.startsWith("http://") || rawPath.startsWith("https://")) return rawPath;
-  const normalized = rawPath.replace(/\\/g, "/");
-  const imageName = normalized.split("/").pop();
-  if (normalized.includes("productimages/") && imageName) {
-    return `http://localhost:4000/productimages/${imageName}`;
-  }
-  return rawPath;
+  return createImageUrl(imagePath, "/assets/storefront/photo-1542291026-7eec264c27ff.jpg");
 }
 
 function formatMoney(value) {
@@ -109,7 +100,7 @@ function Shippingdetails() {
     if (!id) return;
 
     axios
-      .get(`http://localhost:4000/products/${id}`)
+      .get(apiUrl(`/products/${id}`))
       .then((res) => {
         setDirectProduct(normalizeDirectProduct(res.data));
       })
@@ -199,7 +190,7 @@ function Shippingdetails() {
       await Promise.all(
         ordersToPlace.map((item) =>
           axios.post(
-            "http://localhost:4000/placeorder",
+            apiUrl("/placeorder"),
             {
               name: billing.name,
               email: billing.email,

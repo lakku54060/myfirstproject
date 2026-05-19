@@ -1,6 +1,7 @@
 ﻿import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { apiUrl, createImageUrl } from "./utils/api";
 import { showToast } from "./utils/toast";
 import "./Admin.css";
 
@@ -181,17 +182,7 @@ function buildSalesSeries(orders, period) {
 }
 
 function resolveImage(imagePath) {
-  const rawPath = String(imagePath || "").trim();
-  if (!rawPath) {
-    return "/assets/storefront/photo-1542291026-7eec264c27ff.jpg";
-  }
-  if (rawPath.startsWith("http://") || rawPath.startsWith("https://")) return rawPath;
-  const normalized = rawPath.replace(/\\/g, "/");
-  const imageName = normalized.split("/").pop();
-  if (normalized.includes("productimages/") && imageName) {
-    return `http://localhost:4000/productimages/${imageName}`;
-  }
-  return rawPath;
+  return createImageUrl(imagePath, "/assets/storefront/photo-1542291026-7eec264c27ff.jpg");
 }
 
 function formatCurrency(value) {
@@ -270,7 +261,7 @@ function Admin() {
 
   const fetchProducts = async () => {
     try {
-      const res = await axios.get("http://localhost:4000/products");
+      const res = await axios.get(apiUrl("/products"));
       setProducts(Array.isArray(res.data) ? res.data : []);
     } catch (error) {
       console.log(error);
@@ -279,7 +270,7 @@ function Admin() {
 
   const fetchOrders = async () => {
     try {
-      const res = await axios.get("http://localhost:4000/checkorders", {
+      const res = await axios.get(apiUrl("/checkorders"), {
         headers: { Authorization: `Bearer ${token}` },
       });
       setOrders(Array.isArray(res.data) ? res.data : []);
@@ -452,11 +443,11 @@ function Admin() {
         pimage: productForm.pimage.trim(),
       };
       if (editingProductId) {
-        const res = await axios.patch(`http://localhost:4000/products/${editingProductId}`, payload);
+        const res = await axios.patch(apiUrl(`/products/${editingProductId}`), payload);
         setProducts((current) => current.map((item) => (item._id === editingProductId ? res.data : item)));
         showToast("Product updated successfully");
       } else {
-        const res = await axios.post("http://localhost:4000/products", payload);
+        const res = await axios.post(apiUrl("/products"), payload);
         setProducts((current) => [res.data, ...current]);
         showToast("Product added successfully");
       }
@@ -474,7 +465,7 @@ function Admin() {
     if (!window.confirm(`Delete ${product.name}?`)) return;
     try {
       setDeletingProductId(product._id);
-      await axios.delete(`http://localhost:4000/products/${product._id}`);
+      await axios.delete(apiUrl(`/products/${product._id}`));
       setProducts((current) => current.filter((item) => item._id !== product._id));
       showToast("Product deleted successfully");
     } catch (error) {
@@ -489,7 +480,7 @@ function Admin() {
     try {
       setUpdatingId(orderId);
       await axios.patch(
-        `http://localhost:4000/placeorder/${orderId}/status`,
+        apiUrl(`/placeorder/${orderId}/status`),
         { status },
         { headers: { Authorization: `Bearer ${token}` } }
       );

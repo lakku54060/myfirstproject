@@ -1,6 +1,7 @@
 ﻿import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { apiUrl, createImageUrl } from "./utils/api";
 import StoreHeader from "./components/StoreHeader";
 import ProjectFooter from "./components/ProjectFooter";
 import "./homepage.css";
@@ -50,17 +51,7 @@ function RupeeIcon() {
 }
 
 function resolveImage(imagePath) {
-  const rawPath = String(imagePath || "").trim();
-  if (!rawPath) {
-    return "/assets/storefront/photo-1542291026-7eec264c27ff.jpg";
-  }
-  if (rawPath.startsWith("http://") || rawPath.startsWith("https://")) return rawPath;
-  const normalized = rawPath.replace(/\\/g, "/");
-  const imageName = normalized.split("/").pop();
-  if (normalized.includes("productimages/") && imageName) {
-    return `http://localhost:4000/productimages/${imageName}`;
-  }
-  return rawPath;
+  return createImageUrl(imagePath, "/assets/storefront/photo-1542291026-7eec264c27ff.jpg");
 }
 
 function formatMoney(value) {
@@ -117,7 +108,7 @@ function Userpanel() {
     }
 
     axios
-      .get(`http://localhost:4000/viewOrderByCustID/${normalizedCustomerId}`, {
+      .get(apiUrl(`/viewOrderByCustID/${normalizedCustomerId}`), {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -221,7 +212,7 @@ function Userpanel() {
     try {
       setCancellingId(orderId);
 
-      await axios.patch(`http://localhost:4000/placeorder/${orderId}/cancel`, {
+      await axios.patch(apiUrl(`/placeorder/${orderId}/cancel`), {
         custid: requestCustomerId,
       }, {
         headers: { Authorization: `Bearer ${token}` },

@@ -1,4 +1,5 @@
-﻿import axios from "axios";
+import axios from "axios";
+import { apiUrl } from "./api";
 
 export function getCustomerSession() {
   const usertoken = localStorage.getItem("usertoken");
@@ -35,7 +36,7 @@ export async function verifyCustomerJwt() {
   if (!usertoken || !uid || uid === "undefined" || uid === "null") return false;
 
   try {
-    await axios.get("http://localhost:4000/verify-user", {
+    await axios.get(apiUrl("/verify-user"), {
       headers: { Authorization: `Bearer ${usertoken}` },
     });
     return true;
@@ -53,7 +54,7 @@ export async function verifyAdminJwt() {
   if (!admintoken || admintoken === "undefined" || admintoken === "null") return false;
 
   try {
-    await axios.get("http://localhost:4000/verify-admin", {
+    await axios.get(apiUrl("/verify-admin"), {
       headers: { Authorization: `Bearer ${admintoken}` },
     });
     return true;
@@ -78,4 +79,3 @@ export function consumePostLoginRedirect() {
   }
   return null;
 }
-

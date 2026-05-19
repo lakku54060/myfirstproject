@@ -1,6 +1,7 @@
 ﻿import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
+import { apiUrl, createImageUrl } from "./utils/api";
 import "./productdetails.css";
 import StoreHeader from "./components/StoreHeader";
 import { addToCart } from "./utils/cart";
@@ -19,19 +20,7 @@ function Star({ filled = true }) {
 }
 
 function resolveProductImage(imagePath) {
-  const rawPath = String(imagePath || "").trim();
-  if (!rawPath) {
-    return galleryFallbacks[0];
-  }
-  if (rawPath.startsWith("http://") || rawPath.startsWith("https://")) {
-    return rawPath;
-  }
-  const normalized = rawPath.replace(/\\/g, "/");
-  const imageName = normalized.split("/").pop();
-  if (normalized.includes("productimages/") && imageName) {
-    return `http://localhost:4000/productimages/${imageName}`;
-  }
-  return rawPath;
+  return createImageUrl(imagePath, galleryFallbacks[0]);
 }
 
 function normalizeProduct(product) {
@@ -61,14 +50,14 @@ function Productdetails() {
 
   useEffect(() => {
     if (!id) return;
-    axios.get(`http://localhost:4000/products/${id}`).then((res) => {
+    axios.get(apiUrl(`/products/${id}`)).then((res) => {
       const next = normalizeProduct(res.data);
       setProduct(next);
       setSelectedSize(next.sizes[0] || "Free Size");
       setActiveImageIndex(0);
     }).catch((err) => console.error(err));
 
-    axios.get("http://localhost:4000/products").then((res) => {
+    axios.get(apiUrl("/products")).then((res) => {
       const list = Array.isArray(res.data) ? res.data.map(normalizeProduct) : [];
       setRelatedProducts(list.filter((item) => item._id !== id).slice(0, 4));
     }).catch((err) => console.error(err));

@@ -2,6 +2,7 @@
 import { showToast } from "./utils/toast";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { apiUrl, createImageUrl } from "./utils/api";
 import "./homepage.css";
 import StoreHeader from "./components/StoreHeader";
 import { addToCart } from "./utils/cart";
@@ -198,15 +199,7 @@ function Star({ filled = true }) {
 }
 
 function resolveProductImage(imagePath) {
-  const rawPath = String(imagePath || "").trim();
-  if (!rawPath) return fallbackProducts[0].image;
-  if (rawPath.startsWith("http://") || rawPath.startsWith("https://")) return rawPath;
-  const normalized = rawPath.replace(/\\/g, "/");
-  const imageName = normalized.split("/").pop();
-  if (normalized.includes("productimages/") && imageName) {
-    return `http://localhost:4000/productimages/${imageName}`;
-  }
-  return rawPath;
+  return createImageUrl(imagePath, fallbackProducts[0].image);
 }
 
 function Home() {
@@ -244,7 +237,7 @@ function Home() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:4000/products")
+      .get(apiUrl("/products"))
       .then((response) => {
         if (!Array.isArray(response.data)) {
           setDbProducts([]);

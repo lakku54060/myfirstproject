@@ -1,6 +1,7 @@
 ﻿import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { apiUrl } from "./utils/api";
 import "./Adminlogin.css";
 
 function MailIcon() {
@@ -26,7 +27,7 @@ function Adminlogin() {
     event.preventDefault();
 
     axios
-      .post("http://localhost:4000/adminlogin", {
+      .post(apiUrl("/adminlogin"), {
         email,
         password,
       })
